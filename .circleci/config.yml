@@ -35,10 +35,10 @@ workflows:
     when: << pipeline.parameters.regional_infra >>
     jobs:
       - terraform/apply:
-          context: engitano-aws-admin
+          context: "engitano-aws-admin"
           attach-workspace: true
-          context: terraform
-          workspace-root: './infra/deploy/regional'
+          var: "region=ap-southeast-2"
+          path: "./infra/deploy/regional"
           filters:
             branches:
               only: main
