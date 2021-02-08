@@ -1,0 +1,44 @@
+version: 2.1
+
+parameters:
+  # This parameter is used to trigger the main workflow
+  trigger:
+    type: boolean
+    default: true
+
+  # A parameter per package
+  regional_infra:
+    type: boolean
+    default: false
+
+orbs:
+  terraform: circleci/terraform@1.2.0
+
+jobs:
+  trigger-workflows:
+    executor: node
+    steps:
+      - checkout
+      - run:
+          name: Trigger workflows
+          command: chmod +x .circleci/circle_trigger.sh && .circleci/circle_trigger.sh
+
+workflows:
+  version: 2
+
+  ci:
+    when: << pipeline.parameters.trigger >>
+    jobs:
+      - trigger-workflows
+
+  deploy_regional_infrastructure:
+    when: << pipeline.parameters.regional_infra >>
+    jobs:
+      - terraform/apply:
+          context: engitano-aws-admin
+          attach-workspace: true
+          context: terraform
+          workspace-root: './infra/deploy/regional'
+          filters:
+            branches:
+              only: main
